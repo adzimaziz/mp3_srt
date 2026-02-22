@@ -65,9 +65,13 @@ if uploaded_file is not None:
             model = load_whisper_model()
             
         with st.spinner("Transcribing audio... This may take some time depending on file length."):
+            # Extract the original file extension to help FFmpeg decode it properly
+            original_ext = os.path.splitext(uploaded_file.name)[1]
+            
             # Whisper requires a file path, so we save the uploaded file temporarily
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmp_file:
-                tmp_file.write(uploaded_file.getvalue())
+            with tempfile.NamedTemporaryFile(delete=False, suffix=original_ext) as tmp_file:
+                uploaded_file.seek(0)  # Reset file pointer just in case st.audio moved it
+                tmp_file.write(uploaded_file.read())
                 tmp_path = tmp_file.name
                 
             try:
